@@ -19,18 +19,26 @@ pipeline {
           options {
             skipDefaultCheckout(true)
           }
-          agent {
-            docker {
-              image 'gradle:jdk11'
-            }
+          agent { docker { image 'gradle:jdk11' } }
 
-          }
           steps {
             unstash "code"
             sh 'ci/build-app.sh'
             archiveArtifacts 'app/build/libs/'
           }
         }
+        stage('Test app') {
+          options {
+            skipDefaultCheckout(true)
+          }
+          agent { docker { image 'gradle:jdk11' } }
+          steps {
+            unstash "code"
+            sh "ci/unit-test-app.sh"
+            junit 'app/build/test-results/test/TEST-*.xml'
+          }
+        }
+
       }
     }
 
